@@ -15,3 +15,4 @@ Time permitting, I'd also like to implement the following additional features:
 * Allow the player to input a youtube link instead of a raw audio file
 * Allow the player to adjust difficulty of gameplay
 * Implement a scoring and high score system
+* Colors!
