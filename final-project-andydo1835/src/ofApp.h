@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofxSoundPlayerObject.h"
 
 class ofApp : public ofBaseApp{
 
@@ -20,5 +21,12 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
-		
+
+		ofSoundStream stream;
+		ofxSoundOutput output;
+		ofxSoundInput input;
+		ofxSoundPlayerObject song;
+
+		float rms;
+		vector<float> rms_values;
 };

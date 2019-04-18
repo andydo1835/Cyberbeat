@@ -1,1 +1,4 @@
+ofxAudioFile
+ofxFft
 ofxGui
+ofxSoundObjects
