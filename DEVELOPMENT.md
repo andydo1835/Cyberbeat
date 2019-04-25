@@ -13,3 +13,13 @@
 1. Get actual gameplay with keys working
 2. Scoring system
 3. Fine tune audio onset detection
+
+# Work done for Week 2 of Final Project (Code Review 4/25)
+1. Got basic gameplay working with default keys
+2. Basic scoring system, printing to console
+3. Added more songs
+
+# Work to be done for next week
+1. Make game prettier
+2. Highscores list
+3. Settings for # of keys, difficulty, scroll speed, song speed, keybindings
