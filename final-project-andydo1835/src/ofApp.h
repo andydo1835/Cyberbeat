@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxSoundPlayerObject.h"
+#include "DigitalDelay.h"
 
 class ofApp : public ofBaseApp{
 
@@ -22,11 +23,26 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
 
-		ofSoundStream stream;
-		ofxSoundOutput output;
+		bool checkHit(int pos);
+
+		ofSoundStream song_stream;
+		ofSoundStream player_stream;
+		ofxSoundOutput song_output;
+		ofxSoundOutput player_output;
 		ofxSoundInput input;
 		ofxSoundPlayerObject song;
+		ofxSoundPlayerObject player;
+		DigitalDelay delay;
 
 		float rms;
 		vector<float> rms_values;
+
+		bool started = false;
+		vector<ofRectangle*> notes;
+		vector<ofRectangle> keys;
+		int scroll_speed = -10;
+
+		int count = 0;
+		int score = 0;
+		vector<bool> key_pressed;
 };
