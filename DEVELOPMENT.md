@@ -23,3 +23,8 @@
 1. Make game prettier
 2. Highscores list
 3. Settings for # of keys, difficulty, scroll speed, song speed, keybindings
+
+# Work done for Final Week of Final Project (Presentation 5/2 at 3:00 PM)
+1. Added colors and hit lighting
+2. Displaying text in game for score and combo
+3. Added GUI for scroll speed and difficulty adjustment
