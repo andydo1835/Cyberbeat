@@ -4,7 +4,7 @@ make notes appear on the screen according to how pronounced certain frequencies 
 with the song/audio.
 
 # Outside Library
-I plan to use the ofSound library from openFrameworks to split the audio into frequencies and play sound. I'll also be using the basic openFrameworks libraries for the GUI.
+I plan to use the ofSound library from openFrameworks to split the audio into frequencies and play sound. I'll also be using the basic openFrameworks libraries for the GUI. I will also use the ofSoundObjects addon to connect the various sound objects of ofSound.
 
 # Background
 I've researched using a Fast Fourier Transform to split audio into frequencies, and read the [provided ofSound introduction](https://openframeworks.cc/ofBook/chapters/sound.html).
