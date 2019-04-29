@@ -17,7 +17,9 @@ constexpr int DEFAULT_SCROLL_SPEED = 10;
 
 constexpr int NUM_KEYS = 4;
 constexpr int NOTE_HEIGHT = 32;
+constexpr int NOTE_PADDING = 16;
 constexpr int RMS_BUFFER = 25;
+constexpr int FADE_SPEED = 15;
 
 class ofApp : public ofBaseApp{
 
@@ -39,6 +41,10 @@ class ofApp : public ofBaseApp{
 		void updateRMS();
 		bool trackGameState();
 		bool detectAudioOnset();
+		bool setupAudio();
+		void setupGameplay();
+		void drawHitLighting();
+		void drawText();
 
 		// sound objects
 		ofSoundStream song_stream;
@@ -58,14 +64,17 @@ class ofApp : public ofBaseApp{
 		ofxIntSlider scroll_speed;
 		ofxFloatSlider difficulty;
 		map<char, int> keybindings;
+		ofTrueTypeFont verdana24A;
 
 		// gameplay variables
 		bool started = false;
 		bool paused = false;
-		vector<ofRectangle> notes;
-		vector<ofRectangle> keys;
+		vector<pair<ofRectangle, ofColor>> notes;
+		vector<pair<ofRectangle, ofColor>> keys;
 		int score = 0;
 		int last_column = 0;
 		int combo = 0;
 		vector<bool> key_pressed;
+		vector<int> hit_lighting_alpha;
+		int miss_text_alpha;
 };

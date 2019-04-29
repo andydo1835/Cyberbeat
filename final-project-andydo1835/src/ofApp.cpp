@@ -2,62 +2,15 @@
 #include <stdlib.h>
 
 void ofApp::setup(){
-
-	int bufferSize = 512;
-	ofSoundStreamSettings streamSettings;
-		streamSettings.numInputChannels = 2;
-		streamSettings.numOutputChannels = 2;
-		streamSettings.sampleRate = 44100;
-		streamSettings.bufferSize = bufferSize;
-		streamSettings.numBuffers = 4;
-	player_stream.setup(streamSettings);
-	player_stream.setOutput(player_output);
-	player_stream.setInput(input);
-
-	song_stream.setup(streamSettings);
-	song_stream.setOutput(song_output);
-	song_stream.setInput(input);
-
-	ofFileDialogResult result = ofSystemLoadDialog("Please select an audio file (.mp3, .wav, .aiff, .aac)");
-	if (result.bSuccess) {
-		song.load(result.getPath());
-		player.load(result.getPath());
-		song.play();
-		song.setVolume(0);
-	}
-
-	song.connectTo(song_output);
-	player.connectTo(player_output);
-
-	rms_values.push_back(0.0f);
-
-	ofBackground(ofColor::black);
-
-	for (int i = 0; i < NUM_KEYS; i++) {
-		ofRectangle key(ofGetWindowWidth() / NUM_KEYS * i, NOTE_HEIGHT * 2,		// (x, y) coordinates
-						ofGetWindowWidth() / NUM_KEYS, NOTE_HEIGHT * 3);	    // (l, h) dimensions
-		keys.push_back(key);
-	}
-	ofSetColor(ofColor::white);
-	key_pressed.resize(keys.size() + 1, false);
-
-	gui.setup();
-	gui.add(scroll_speed.setup("scroll speed", DEFAULT_SCROLL_SPEED, MIN_SCROLL_SPEED, MAX_SCROLL_SPEED));
-	gui.add(difficulty.setup("difficulty", DEFAULT_DIFFICULTY, MIN_DIFFICULTY, MAX_DIFFICULTY));
-
-	keybindings.insert(pair<char, int>('w', 0));
-	keybindings.insert(pair<char, int>('e', 1));
-	keybindings.insert(pair<char, int>('i', 2));
-	keybindings.insert(pair<char, int>('o', 3));
-	keybindings.insert(pair<char, int>('p', 4));
+	ofBackground(ofColor::white);
+	setupAudio();
+	setupGameplay();
 }
 
 void ofApp::update(){
 	song.setPaused(paused);
 	player.setPaused(paused);
-	if (paused) {
-
-	} else {
+	if (!paused) {
 		updateRMS();
 		detectAudioOnset();
 		trackGameState();
@@ -65,12 +18,13 @@ void ofApp::update(){
 }
 
 void ofApp::draw(){
-	std::cout << score << std::endl;
 	if (paused) {
 		gui.draw();
 	} else {
 		drawKeys();
 		drawNotes();
+		drawHitLighting();
+		drawText();
 	}
 }
 
@@ -105,14 +59,16 @@ void ofApp::keyReleased(int key){
 
 bool ofApp::checkHit(int pos) {
 	for (int i = 0; i < notes.size(); i++) {
-		if (notes[i].intersects(keys[pos])) {
+		if (notes[i].first.intersects(keys[pos].first)) {
 			notes.erase(notes.begin() + i);
 			combo++;
 			score += combo;
+			hit_lighting_alpha[pos] = 255;
 			return true;
 		}
 	}
 	combo = 0;
+	miss_text_alpha = 255;
 	return false;
 }
 
@@ -123,26 +79,32 @@ void ofApp::makeNote() {
 	}
 	last_column = column;
 	bool intersect = false;
-	ofRectangle note = ofRectangle(ofGetWindowWidth() / NUM_KEYS * column,			// x coordinate
-								   ofGetWindowHeight(),								// y coordinate
-								   ofGetWindowWidth() / NUM_KEYS, NOTE_HEIGHT);	    // (l, h) dimensions
+	ofRectangle note = ofRectangle(ofGetWindowWidth() / NUM_KEYS * column + (NOTE_PADDING / 2),	// x coordinate
+								   ofGetWindowHeight(),											// y coordinate
+								   ofGetWindowWidth() / NUM_KEYS - NOTE_PADDING, NOTE_HEIGHT);	// (l, h) dimensions
+
 	for (int i = 0; i < notes.size(); i++) {
 		// if it intersects another rectangle, don't draw it
-		if (note.intersects(notes[i])) {
+		if (note.intersects(notes[i].first)) {
 			intersect = true;
 			break;
 		}
 	}
 	if (!intersect) {
-		notes.push_back(note);
+		if (column == 0 || column == 3) {
+			notes.push_back(pair<ofRectangle, ofColor>(note, ofColor::red));
+		} else {
+			notes.push_back(pair<ofRectangle, ofColor>(note, ofColor::blue));
+		}
 	}
 }
 
 bool ofApp::checkStart() {
 	// here, we make the assumption that the song creates a note
-	// to start, which is usually true unless it begins extremely quietly
+	// to start, which is usually true unless it begins extremely
+	// quietly and the difficulty is preemptively set to low
 	for (int i = 0; i < notes.size(); i++) {
-		if (notes[i].getTop() <= NOTE_HEIGHT * 5) { // NOTE_HEIGHT * 5 = bottom of the row of keys
+		if (notes[i].first.getTop() <= NOTE_HEIGHT * 5) { // NOTE_HEIGHT * 5 = bottom of the row of keys
 			started = true;
 			player.play();
 		}
@@ -152,12 +114,13 @@ bool ofApp::checkStart() {
 
 void ofApp::drawNotes() {
 	for (int i = 0; i < notes.size(); i++) {
-		notes[i].translateY(scroll_speed * -1);
-		ofDrawRectangle(notes[i]);
+		notes[i].first.translateY(scroll_speed * -1);
+		ofSetColor(notes[i].second);
+		ofDrawRectangle(notes[i].first);
 
 		// if the player has missed a note
-		if (notes[i].getTop() <= 0) {
-			score--;
+		if (notes[i].first.getBottom() <= 0) {
+			miss_text_alpha = 255;
 			notes.erase(notes.begin() + i);
 			combo = 0;
 		}
@@ -167,7 +130,8 @@ void ofApp::drawNotes() {
 void ofApp::drawKeys() {
 	for (int i = 0; i < keys.size(); i++) {
 		ofNoFill();
-		ofDrawRectangle(keys[i]);
+		ofSetColor(keys[i].second);
+		ofDrawRectangle(keys[i].first);
 	}
 	ofFill();
 }
@@ -220,4 +184,89 @@ bool ofApp::detectAudioOnset() {
 		return true;
 	}
 	return false;
+}
+
+bool ofApp::setupAudio() {
+	int bufferSize = 512;
+		ofSoundStreamSettings streamSettings;
+		streamSettings.numInputChannels = 2;
+		streamSettings.numOutputChannels = 2;
+		streamSettings.sampleRate = 44100;
+		streamSettings.bufferSize = bufferSize;
+		streamSettings.numBuffers = 4;
+
+	player_stream.setup(streamSettings);
+	player_stream.setOutput(player_output);
+	player_stream.setInput(input);
+	song_stream.setup(streamSettings);
+	song_stream.setOutput(song_output);
+	song_stream.setInput(input);
+
+	ofFileDialogResult result = ofSystemLoadDialog("Please select an audio file (.mp3, .wav, .aiff, .aac)");
+	if (result.bSuccess) {
+		song.load(result.getPath());
+		player.load(result.getPath());
+		song.play();
+		song.setVolume(0);
+	} else {
+		return false;
+	}
+
+	song.connectTo(song_output);
+	player.connectTo(player_output);
+
+	return true;
+}
+
+void ofApp::setupGameplay() {
+	for (int i = 0; i < NUM_KEYS; i++) {
+		ofRectangle key(ofGetWindowWidth() / NUM_KEYS * i + (NOTE_PADDING / 2) , NOTE_HEIGHT * 2,	// (x, y) coordinates
+						ofGetWindowWidth() / NUM_KEYS - NOTE_PADDING, NOTE_HEIGHT * 3);				// (l, h) dimensions
+		if (i == 0 || i == 3) {
+			keys.push_back(pair<ofRectangle, ofColor>(key, ofColor::red));
+		} else {
+			keys.push_back(pair<ofRectangle, ofColor>(key, ofColor::blue));
+		}
+	}
+
+	key_pressed.resize(keys.size() + 1, false);
+	hit_lighting_alpha.resize(keys.size(), 0);
+	miss_text_alpha = 0;
+
+	gui.setup();
+	gui.add(scroll_speed.setup("scroll speed", DEFAULT_SCROLL_SPEED, MIN_SCROLL_SPEED, MAX_SCROLL_SPEED));
+	gui.add(difficulty.setup("difficulty", DEFAULT_DIFFICULTY, MIN_DIFFICULTY, MAX_DIFFICULTY));
+
+	verdana24A.load("verdana.ttf", 24, false);
+	verdana24A.setLineHeight(28.0f);
+	verdana24A.setLetterSpacing(1.036);
+
+	keybindings.insert(pair<char, int>('w', 0));
+	keybindings.insert(pair<char, int>('e', 1));
+	keybindings.insert(pair<char, int>('i', 2));
+	keybindings.insert(pair<char, int>('o', 3));
+	keybindings.insert(pair<char, int>('p', 4));
+
+	rms_values.push_back(0.0f);
+}
+
+void ofApp::drawHitLighting() {
+	ofEnableAlphaBlending();
+	for (int i = 0; i < hit_lighting_alpha.size(); i++) {
+		ofSetColor(keys[i].second, hit_lighting_alpha[i]);
+		ofDrawRectangle(keys[i].first);
+		hit_lighting_alpha[i] -= FADE_SPEED;
+	}
+	ofDisableAlphaBlending();
+}
+
+void ofApp::drawText() {
+	ofSetColor(ofColor::black);
+	verdana24A.drawString("Score: " + std::to_string(score), ofGetWindowWidth() / 4 * 3, NOTE_PADDING * 2);
+	verdana24A.drawString("Combo: " + std::to_string(combo), NOTE_PADDING, NOTE_PADDING * 2);
+	ofSetColor(ofColor::red, miss_text_alpha);
+	ofEnableAlphaBlending();
+	verdana24A.drawString("MISS", ofGetWindowWidth() / 2 - NOTE_PADDING * 3, ofGetWindowHeight() / 2);
+	miss_text_alpha -= FADE_SPEED;
+	ofDisableAlphaBlending();
 }
