@@ -16,6 +16,7 @@ constexpr int MAX_SCROLL_SPEED = 30;
 constexpr int DEFAULT_SCROLL_SPEED = 10;
 
 constexpr int NUM_KEYS = 4;
+constexpr char DEFAULT_KEYBINDINGS[] = "weiop";
 constexpr int NOTE_HEIGHT = 32;
 constexpr int NOTE_PADDING = 16;
 constexpr int RMS_BUFFER = 25;
@@ -65,6 +66,7 @@ class ofApp : public ofBaseApp{
 		ofxFloatSlider difficulty;
 		map<char, int> keybindings;
 		ofTrueTypeFont verdana24A;
+		ofTrueTypeFont verdana48A;
 
 		// gameplay variables
 		bool started = false;

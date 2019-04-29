@@ -91,7 +91,7 @@ void ofApp::makeNote() {
 		}
 	}
 	if (!intersect) {
-		if (column == 0 || column == 3) {
+		if (column == 0 || column == keys.size() - 1) {
 			notes.push_back(pair<ofRectangle, ofColor>(note, ofColor::red));
 		} else {
 			notes.push_back(pair<ofRectangle, ofColor>(note, ofColor::blue));
@@ -222,11 +222,14 @@ void ofApp::setupGameplay() {
 	for (int i = 0; i < NUM_KEYS; i++) {
 		ofRectangle key(ofGetWindowWidth() / NUM_KEYS * i + (NOTE_PADDING / 2) , NOTE_HEIGHT * 2,	// (x, y) coordinates
 						ofGetWindowWidth() / NUM_KEYS - NOTE_PADDING, NOTE_HEIGHT * 3);				// (l, h) dimensions
-		if (i == 0 || i == 3) {
+		if (i == 0 || i == NUM_KEYS - 1) {
 			keys.push_back(pair<ofRectangle, ofColor>(key, ofColor::red));
 		} else {
 			keys.push_back(pair<ofRectangle, ofColor>(key, ofColor::blue));
 		}
+	}
+	for (int i = 0; i < NUM_KEYS + 1; i++) {
+		keybindings.insert(pair<char, int>(DEFAULT_KEYBINDINGS[i], i));
 	}
 
 	key_pressed.resize(keys.size() + 1, false);
@@ -240,12 +243,9 @@ void ofApp::setupGameplay() {
 	verdana24A.load("verdana.ttf", 24, false);
 	verdana24A.setLineHeight(28.0f);
 	verdana24A.setLetterSpacing(1.036);
-
-	keybindings.insert(pair<char, int>('w', 0));
-	keybindings.insert(pair<char, int>('e', 1));
-	keybindings.insert(pair<char, int>('i', 2));
-	keybindings.insert(pair<char, int>('o', 3));
-	keybindings.insert(pair<char, int>('p', 4));
+	verdana48A.load("verdana.ttf", 48, false);
+	verdana48A.setLineHeight(52.0f);
+	verdana48A.setLetterSpacing(1.04);
 
 	rms_values.push_back(0.0f);
 }
@@ -264,9 +264,20 @@ void ofApp::drawText() {
 	ofSetColor(ofColor::black);
 	verdana24A.drawString("Score: " + std::to_string(score), ofGetWindowWidth() / 4 * 3, NOTE_PADDING * 2);
 	verdana24A.drawString("Combo: " + std::to_string(combo), NOTE_PADDING, NOTE_PADDING * 2);
+
 	ofSetColor(ofColor::red, miss_text_alpha);
 	ofEnableAlphaBlending();
 	verdana24A.drawString("MISS", ofGetWindowWidth() / 2 - NOTE_PADDING * 3, ofGetWindowHeight() / 2);
 	miss_text_alpha -= FADE_SPEED;
 	ofDisableAlphaBlending();
+
+	// draw keybinds on keys
+	for (int i = 0; i < keys.size(); i++) {
+		if (i == 0 || i == keys.size() - 1) {
+			ofSetColor(ofColor::red);
+		} else {
+			ofSetColor(ofColor::blue);
+		}
+		verdana48A.drawString(string(1, DEFAULT_KEYBINDINGS[i]), keys[i].first.getCenter().x - NOTE_PADDING, keys[i].first.getCenter().y + NOTE_PADDING);
+	}
 }
