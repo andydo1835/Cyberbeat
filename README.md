@@ -14,7 +14,7 @@ This is a simple rhythm game (in a style similar to StepMania or Dance Dance Rev
 
 ![Screenshot of Gameplay](https://i.imgur.com/Z9u7aBE.png)
 
-The game currently supports 4 keys, mapped to w, e, i, o from left to right, and p to pause the game or change gameplay settings like scroll speed or difficulty. Scroll speed can be adjusted from 10 to 30, with 30 being the fastest, and difficulty can be adjusted from 1.0 to 5.0, with 5.0 being the hardest. The player should press the respective key when a note is over the outlined box.
+The game currently supports 4 keys, mapped to w, e, i, o from left to right, and p to pause the game or change gameplay settings like scroll speed or difficulty. Scroll speed can be adjusted from 5 to 30, with 30 being the fastest, and difficulty can be adjusted from 1.0 to 5.0, with 5.0 being the hardest. The player should press the respective key when a note is over the outlined box.
 
 For each note hit correctly (timing does not matter as long as the note is over the key when the player presses the key), combo is increased by 1, and score is increased by the combo. When a note hits the top of the screen or the player hits a key when there is not a note over it, the game registers a miss, and combo is reset back to 0. The player does not lose any score, so score is always a positive integer. Additionally, for every successful hit, the outlined box will flash its respective color to denote a hit, or when the player misses, the fading text "MISS" will flash in red in the center of the screen to denote a miss.
 
