@@ -1,7 +1,7 @@
-# Final Project
+# Cyberbeat
 ## A self-generating rhythm game using audio onset detection.
 
-This is a simple rhythm game (in a style similar to StepMania or Dance Dance Revolution with cascading notes) that automatically generates playable maps from audio files. This makes heavy use of the [openFrameworks library](https://openframeworks.cc/).
+This is a simple vertical scrolling rhythm game (in a style similar to StepMania or Dance Dance Revolution with cascading notes) that automatically generates playable maps from audio files. This makes heavy use of the [openFrameworks library](https://openframeworks.cc/).
 
 ## Dependencies
 
